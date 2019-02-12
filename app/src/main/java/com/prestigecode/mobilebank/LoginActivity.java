@@ -30,9 +30,11 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.prestigecode.mobilebank.DB.Query;
 import com.prestigecode.mobilebank.User.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
@@ -189,7 +191,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            String loginToken = "";
+            mAuthTask = new UserLoginTask(email, password, loginToken);
             mAuthTask.execute((Void) null);
 
             //Build intent to pass user back
@@ -198,7 +201,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //lobby.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
             //Add ParcelableExtra so we can return superUser to Main Activity
-            intent.putExtra("User", new User(0, email, "authstring"));
+            intent.putExtra("User", new User(0, email, loginToken)); //set info
             //Return OK and pass intent so we can send putExtra (User) back
             setResult(Activity.RESULT_OK, intent);
 
@@ -314,23 +317,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mEmail;
         private final String mPassword;
+        private String result;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String email, String password, String inResult) {
             mEmail = email;
             mPassword = password;
+            result = inResult;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+            // Simulate network access.
+            //Thread.sleep(2000);
+
+            HashMap<String, String> hashMap = new HashMap<>(); //gen map to populate values
+            hashMap.put("action", "login");
+            hashMap.put("username", mEmail);
+            hashMap.put("password", mPassword);
+            String msg = "";
+            new Query(getApplicationContext(), hashMap, msg).execute(); //pass map to login task
+            if(msg != "incorrect_pass") {
+                result = msg; //get token back
+                return true;
+            } else {
                 return false;
             }
 
+            /*
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
@@ -338,9 +353,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     return pieces[1].equals(mPassword);
                 }
             }
+            */
 
             // TODO: register the new account here.
-            return true;
+            //return true;
         }
 
         @Override

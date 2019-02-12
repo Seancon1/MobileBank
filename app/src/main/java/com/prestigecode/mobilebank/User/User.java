@@ -15,7 +15,7 @@ public class User implements Parcelable {
      */
     int ID = 0;
     String name = "";
-    String authString;
+    private String authString;
 
 
     User() {
@@ -49,6 +49,8 @@ public class User implements Parcelable {
 
     public int getID() { return this.ID; }
     public String getName() { return this.name; }
+    public String getToken() { return this.authString; }
+
 
     @Override
     public int describeContents() {
