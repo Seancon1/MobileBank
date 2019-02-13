@@ -20,7 +20,6 @@ public class MyAccount extends AppCompatActivity {
 
     public void logUserOut(View view) {
         //Send intent back with RESULT OK so that MainActivity can run logout function
-
         Intent intent = new Intent(MyAccount.this, MainActivity.class);
         setResult(Activity.RESULT_OK, intent);
         finish();

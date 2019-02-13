@@ -164,9 +164,9 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
                 }
                 if(resultCode == Activity.RESULT_CANCELED) {
-                    //superUser = null; //to reset superUser to null
-                    //hasLoggedIn = false;
-                    finish(); //experimental
+                    superUser = null; //to reset superUser to null
+                    hasLoggedIn = false;
+                    //finish(); //experimental
                 }
                 break;
 
@@ -278,11 +278,11 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                     textView.append("" + item.getKey() + " - :" + item.getValue());
                 }
                 */
-
+                textView.setTextSize(25);
                 textView.setText("");
                 //loop through each BankAccount that was created and display relevant information
                 for(BankAccount item : jsonBankAccountResult) {
-                    textView.append(item.getType()+ " : " + item.getBalance() + "\n");
+                    textView.append("" + item.toString() + "\n");
                 }
 
 

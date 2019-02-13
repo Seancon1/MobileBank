@@ -1,9 +1,15 @@
 package com.prestigecode.mobilebank;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,9 +20,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.prestigecode.mobilebank.DB.Query;
 import com.prestigecode.mobilebank.DB.QueryThread;
+import com.prestigecode.mobilebank.User.AreYouSure;
 import com.prestigecode.mobilebank.User.User;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 
 public class UserLogin extends AppCompatActivity {
 
@@ -46,10 +56,13 @@ public class UserLogin extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        AreYouSure areYouSure = new AreYouSure();
+        areYouSure.show(ft,"1");
         setResult(RESULT_CANCELED);
         //super.onBackPressed();
     }
+
 
     //String userName = "";
     //String userLoginToken = "";
@@ -81,8 +94,9 @@ public class UserLogin extends AppCompatActivity {
                         try {
                             Log.e("INSIGHT", "" + editTextUN.getText() + "" + editTextUP.getText() );
                             if(TextUtils.isEmpty(editTextUN.getText()) || TextUtils.isEmpty(editTextUP.getText())){
-                                    addErrorText(errorText, "Username and password are required.");
+                                    addResultText(errorText, "Username and password are required.", 0);
                             } else {
+                                addResultText(errorText,"One moment...", 1);
                                 //Call login query
                                 String result = "";
                                 HashMap<String, String> hashMap = new HashMap<>(); //gen map to populate values
@@ -96,11 +110,11 @@ public class UserLogin extends AppCompatActivity {
 
                                 Log.e("Result Found", thread.getResult());
                                 while(thread.getResult().length() < 1) {
+                                    addResultText(errorText, "Loading...", 1);
                                     sleep(250);
-                                    Log.e("Thread Loop", "waiting for thread result to populate");
                                 }
                                 if(thread.getResult().contains("incorrect")) {
-                                    addErrorText(errorText, "No account found, please try again.");
+                                    addResultText(errorText, "No account found, please try again.", 0);
                                 } else {
                                     //does not contain incorrect
                                     finishLogin(editTextUN.getText().toString(), thread.getResult()); //set username and auth token for use the rest of the time
@@ -110,7 +124,7 @@ public class UserLogin extends AppCompatActivity {
                             }
 
                         } catch (Exception e) {
-                            Log.e("LoginError", e.toString());
+                            Log.e("Login", "Error " + e.toString());
                         }
 
                     }
@@ -122,9 +136,17 @@ public class UserLogin extends AppCompatActivity {
         }
     }
 
-    public void addErrorText(TextView textView, String string) {
-        textView.setTextColor(Color.RED);
-        //textView.append(string + "\n");
+    public void addResultText(TextView textView, String string, int tag) {
+        switch(tag) {
+            case 0:
+                textView.setTextColor(Color.RED);
+                break;
+            case 1:
+                textView.setTextColor(Color.BLUE);
+            break;
+        }
+
         textView.setText(string + "\n");
+
     }
 }

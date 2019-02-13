@@ -124,8 +124,6 @@ public class QueryThread extends Thread {
     }
 
     public ArrayList<BankAccount> getArrayListResult() {
-
-
         return null;
     }
 
@@ -148,12 +146,15 @@ public class QueryThread extends Thread {
     Shows how much I know of Java, syntax is hard to understand here for defining the Type type
      */
     public List<BankAccount> getBankAccounts() {
+        //Parse card details from json format into an object, in this case it's BankAccount object.
         Gson gson = new Gson();
         Type type = new TypeToken<List<BankAccount>>(){}.getType();
         List<BankAccount> bankAccounts = gson.fromJson(this.getResult(), type);
+        /*
         for (BankAccount account : bankAccounts){
-            Log.i("Contact Details", account.getType() + "-" + account.getBalance());
+            Log.i("Contact Details", account.toString());
         }
+        */
 
         return bankAccounts;
     }
