@@ -16,6 +16,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
+        <activity android:name=".RegisterAccount">
+        </activity>
         <activity android:name=".User.MyAccount">
         </activity>
         <activity android:name=".UserLogin">

@@ -149,4 +149,10 @@ public class UserLogin extends AppCompatActivity {
         textView.setText(string + "\n");
 
     }
+
+    public void openRegistration(View view) {
+        Intent intent = new Intent(UserLogin.this, RegisterAccount.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+    }
 }

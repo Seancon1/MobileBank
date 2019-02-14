@@ -15,13 +15,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 import com.fasterxml.jackson.*;
@@ -32,16 +38,16 @@ public class QueryThread extends Thread {
     HashMap<String, String> params;
     String superResult = "";
 
-    String url = "http://usf.prestigecode.com/srpj/query.php";
+    String url = "https://prestigecode.com/projects/senior/query.php";
     URL urlObj;
     HttpURLConnection conn;
 
-    //One without object reference
     public QueryThread(Context context,HashMap<String, String> params) {
         this.context = context; //make sure we pass context so we can not crash
         this.params = params; //pass through
 
         try {
+
             urlObj = new URL(url);
             conn = (HttpURLConnection) urlObj.openConnection();
         } catch (Exception e) {
@@ -71,35 +77,35 @@ public class QueryThread extends Thread {
         try{
             //CONN info was located here for scope concerns IF any error happens
 
-            conn.setUseCaches(false);
-            conn.setDefaultUseCaches(false);
+                conn.setUseCaches(false);
+                conn.setDefaultUseCaches(false);
 
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Accept-Charset", "UTF-8");
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Accept-Charset", "UTF-8");
 
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
-            conn.connect();
+                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(15000);
+                conn.connect();
 
-            String paramsString = sbParams.toString();
+                String paramsString = sbParams.toString();
 
-            DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-            wr.writeBytes(paramsString);
-            wr.flush();
-            wr.close();
+                DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                wr.writeBytes(paramsString);
+                wr.flush();
+                wr.close();
 
-            InputStream in = new BufferedInputStream(conn.getInputStream());
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
-            }
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
 
-            Log.e("Query", "result: " + result.toString());
-            superResult = null;
-            superResult = result.toString();
+                Log.e("Query", "result: " + result.toString());
+                superResult = result.toString();
+
             //return result.toString();
         } catch (IOException e) {
             e.printStackTrace();
