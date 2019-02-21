@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.prestigecode.mobilebank.DB.Query;
 import com.prestigecode.mobilebank.DB.QueryThread;
@@ -35,7 +36,7 @@ public class UserLogin extends AppCompatActivity {
     EditText editTextUN;
     EditText editTextUP;
     TextView errorText;
-
+    ProgressBar progressBar;
     final String logInResult = "";
 
     @Override
@@ -48,7 +49,9 @@ public class UserLogin extends AppCompatActivity {
         editTextUN = findViewById(R.id.editTextUN);
         editTextUP = findViewById(R.id.editTextPass);
         errorText = findViewById(R.id.textViewLoginError);
+        progressBar = findViewById(R.id.progressBar_UserLogin);
 
+        progressBar.setVisibility(View.INVISIBLE);
         editTextUN.setText(""); //remove text
         editTextUN.requestFocus(); //get focus
 
@@ -69,7 +72,7 @@ public class UserLogin extends AppCompatActivity {
     //Constructor
     public UserLogin () { }
 
-    private void finishLogin(String userName, String userLoginToken) {
+    private void finishLogin(int inID, String inUserName, String inUserLoginToken) {
         //Build intent to pass user back
         Intent intent = new Intent(UserLogin.this, MainActivity.class);
         //lobby.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
@@ -77,14 +80,24 @@ public class UserLogin extends AppCompatActivity {
 
 
         //Add ParcelableExtra so we can return superUser to Main Activity
-        intent.putExtra("User", new User(0, userName, userLoginToken)); //set info
+        intent.putExtra("User", new User(inID, inUserName, inUserLoginToken)); //set info
         //Return OK and pass intent so we can send putExtra (User) back
         setResult(Activity.RESULT_OK, intent);
+    }
+
+    private void finishLogin(User inUser) {
+        //Build intent to pass user back
+        Intent intent = new Intent(UserLogin.this, MainActivity.class);
+
+        //Add ParcelableExtra so we can return superUser to Main Activity
+        intent.putExtra("User", inUser); //set inUser class as intent information
+        setResult(Activity.RESULT_OK, intent); //send
     }
 
     public void doLogin(View view) {
 
         Button button = findViewById(R.id.buttonLogIn);
+        progressBar.setVisibility(View.VISIBLE);
 
         try {
             //try login stuff
@@ -97,6 +110,7 @@ public class UserLogin extends AppCompatActivity {
                                     addResultText(errorText, "Username and password are required.", 0);
                             } else {
                                 addResultText(errorText,"One moment...", 1);
+                                progressBar.animate();
                                 //Call login query
                                 String result = "";
                                 HashMap<String, String> hashMap = new HashMap<>(); //gen map to populate values
@@ -111,13 +125,13 @@ public class UserLogin extends AppCompatActivity {
                                 Log.e("Result Found", thread.getResult());
                                 while(thread.getResult().length() < 1) {
                                     addResultText(errorText, "Loading...", 1);
+
                                     sleep(250);
                                 }
                                 if(thread.getResult().contains("incorrect")) {
                                     addResultText(errorText, "No account found, please try again.", 0);
                                 } else {
-                                    //does not contain incorrect
-                                    finishLogin(editTextUN.getText().toString(), thread.getResult()); //set username and auth token for use the rest of the time
+                                    finishLogin(thread.getUserAccount()); //set username and auth token for use the rest of the time
                                     finish();
                                 }
 
@@ -126,7 +140,7 @@ public class UserLogin extends AppCompatActivity {
                         } catch (Exception e) {
                             Log.e("Login", "Error " + e.toString());
                         }
-
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 };
                 thread.start();
@@ -151,7 +165,8 @@ public class UserLogin extends AppCompatActivity {
     }
 
     public void openRegistration(View view) {
-        Intent intent = new Intent(UserLogin.this, RegisterAccount.class);
+       //Intent intent = new Intent(UserLogin.this, RegisterAccount.class);
+        Intent intent = new Intent(UserLogin.this, Web_RegisterAccount.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }

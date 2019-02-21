@@ -107,10 +107,10 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
                         if(superUser == null) {
                             // .1 delay shortens the time that the main activity is shown upon startup
-                            sleep(250); // .25 second
+                            sleep(100); //
                         } else {
                             //when user is populated, then a normal 1 second tick is established
-                            sleep(250); //
+                            sleep(250);
                         }
 
                         tick++; //Tick increment
@@ -137,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         };
         thread.start();
 
-        //doCheckIfLogged();
     }
 
 
@@ -147,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         //Check which requestCode was used
         switch(requestCode) {
-            //Case go to the correct logic for that result
+            //Case go to the correct logic for that resultCode
 
             case 0: //login
                 if(resultCode == Activity.RESULT_OK) {
@@ -214,7 +213,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         Button button = findViewById(R.id.button2);
         String buttonResponse;
         try {
-            //new Connect(this.getApplicationContext(), 0).execute("wow1");
             /*
             HashMap<String, String> hashMap = new HashMap<>();
             hashMap.put("action", "login");
@@ -235,7 +233,10 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
 
     public void fetchAccountInfo() {
-        //For now I am running threads for each new operation since I need a result
+        /*
+        For now I am running threads for each new operation since I need a result
+        I need to use AsyncTask for this but still learning how to get results easier without null point exception somewhere
+         */
         Thread singleThread = new Thread() {
             @Override
             public void run() {
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                 try {
                     HashMap<String, String> hashMap = new HashMap<>(); //gen map to populate values
                     hashMap.put("action", "getBankAccounts");
-                    hashMap.put("UID", "3");
+                    hashMap.put("UID", ""+superUser.getID());
                     hashMap.put("TOKEN", superUser.getToken());
                     QueryThread thread = new QueryThread(getApplicationContext(), hashMap);
                     thread.start();

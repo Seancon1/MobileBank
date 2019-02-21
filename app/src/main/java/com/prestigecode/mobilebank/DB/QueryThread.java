@@ -1,36 +1,18 @@
 package com.prestigecode.mobilebank.DB;
 
 import android.content.Context;
-import android.util.JsonToken;
 import android.util.Log;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.prestigecode.mobilebank.MainActivity;
 import com.prestigecode.mobilebank.User.BankAccount;
-import com.prestigecode.mobilebank.User.JsonHelper;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import com.prestigecode.mobilebank.User.User;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.*;
 
-import com.fasterxml.jackson.*;
 
 public class QueryThread extends Thread {
 
@@ -117,13 +99,10 @@ public class QueryThread extends Thread {
     }
 
     public String getResult() {
-
         return this.superResult;
     }
 
     public BankAccount getGsonJsonResult() {
-
-        //Test to see if we can parse the json string into a usable object in the application
         String jsonString = this.getResult();
         BankAccount map = new Gson().fromJson(jsonString, BankAccount.class);
         return map;
@@ -132,17 +111,6 @@ public class QueryThread extends Thread {
     public ArrayList<BankAccount> getArrayListResult() {
         return null;
     }
-
-    /*
-    public JSONObject getJSONArrayResult() throws Exception {
-
-        List list = new JsonHelper.toList(this.superResult);
-
-        JSONArray jsonArray = new JSONArray(superResult);
-        //JSONObject jsonObject = new JSONObject(superResult);
-
-    }
-    */
 
     /*
     Thank you user Riser
@@ -156,13 +124,13 @@ public class QueryThread extends Thread {
         Gson gson = new Gson();
         Type type = new TypeToken<List<BankAccount>>(){}.getType();
         List<BankAccount> bankAccounts = gson.fromJson(this.getResult(), type);
-        /*
-        for (BankAccount account : bankAccounts){
-            Log.i("Contact Details", account.toString());
-        }
-        */
-
         return bankAccounts;
+    }
+
+    public User getUserAccount() {
+        String jsonString = this.getResult();
+        User user = new Gson().fromJson(jsonString, User.class);
+        return user;
     }
 
 
