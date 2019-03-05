@@ -3,6 +3,11 @@ package com.prestigecode.mobilebank.User;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * User class, this class will be instantiated and hold the data
  * for the user during app runtime.
@@ -62,5 +67,15 @@ public class User implements Parcelable {
         dest.writeInt(ID);
         dest.writeString(name);
         dest.writeString(authString);
+    }
+
+    /*
+    Return a map of user info
+     */
+    public Map<String,String> getAuthDetails() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("ID", "" + this.getID());
+        map.put("token", "" + this.getToken());
+        return map;
     }
 }

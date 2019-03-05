@@ -10,4 +10,7 @@
             android:text="LobbyText"
             android:layout_width="match_parent"
             android:layout_height="37dp" android:id="@+id/textViewTopInfo"/>
+    <WebView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:id="@+id/WebView_Lobby"/>
 </FrameLayout>

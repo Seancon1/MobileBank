@@ -3,6 +3,7 @@ package com.prestigecode.mobilebank;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.*;
@@ -36,6 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import static com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat.COLOR;
 
 public class MainActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
@@ -110,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                             sleep(100); //
                         } else {
                             //when user is populated, then a normal 1 second tick is established
-                            sleep(250);
+                            sleep(1000);
                         }
 
                         tick++; //Tick increment
@@ -155,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                     //Update display items
                     txtAccountWelcome = findViewById(R.id.textViewAccountWelcome);
                     txtAccountWelcome.setText("Welcome " + superUser.getName());
+                    txtAccountWelcome.setTextColor(Color.BLUE);
+
 
                     //Update Quick display of user bank accounts
                     System.out.println("Updating User UI Items");
@@ -187,6 +192,13 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         intent.putExtra("User", superUser);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivityForResult(intent, 1);
+    }
+
+    public void viewAccounts(View view) {
+        Intent intent = new Intent(MainActivity.this, AccountHub.class);
+        intent.putExtra("User", superUser);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivityForResult(intent, 2);
     }
 
     private void doCheckIfLogged() {

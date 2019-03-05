@@ -2,11 +2,14 @@ package com.prestigecode.mobilebank;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -15,10 +18,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.*;
 import com.prestigecode.mobilebank.DB.Query;
 import com.prestigecode.mobilebank.DB.QueryThread;
 import com.prestigecode.mobilebank.User.AreYouSure;
@@ -94,23 +94,41 @@ public class UserLogin extends AppCompatActivity {
         setResult(Activity.RESULT_OK, intent); //send
     }
 
+
+
     public void doLogin(View view) {
 
         Button button = findViewById(R.id.buttonLogIn);
-        progressBar.setVisibility(View.VISIBLE);
+       // progressBar.setVisibility(View.VISIBLE);
+
+        AsyncTask asyncTask = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(Object[] values) {
+                super.onProgressUpdate(values);
+            }
+        };
+
+        asyncTask.execute();
 
         try {
             //try login stuff
                 Thread thread = new Thread() {
+
                     @Override
                     public void run() {
+
                         try {
                             Log.e("INSIGHT", "" + editTextUN.getText() + "" + editTextUP.getText() );
                             if(TextUtils.isEmpty(editTextUN.getText()) || TextUtils.isEmpty(editTextUP.getText())){
                                     addResultText(errorText, "Username and password are required.", 0);
                             } else {
                                 addResultText(errorText,"One moment...", 1);
-                                progressBar.animate();
+                                //progressBar.animate();
                                 //Call login query
                                 String result = "";
                                 HashMap<String, String> hashMap = new HashMap<>(); //gen map to populate values
@@ -140,7 +158,6 @@ public class UserLogin extends AppCompatActivity {
                         } catch (Exception e) {
                             Log.e("Login", "Error " + e.toString());
                         }
-                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 };
                 thread.start();
@@ -148,7 +165,75 @@ public class UserLogin extends AppCompatActivity {
             //do catch
             Log.e("Login", "Error: " + e.toString());
         }
+       //1 progressBar.setVisibility(View.INVISIBLE);
     }
+
+    public void doLoginAsync(View view) {
+
+        Button button = findViewById(R.id.buttonLogIn);
+        // progressBar.setVisibility(View.VISIBLE);
+        Log.e("Login", "Using asynctask!");
+        AsyncTask asyncTask = new AsyncTask(null, null, null) {
+            TextView textView = null;
+
+
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                Log.e("INSIGHT", "" + editTextUN.getText() + "" + editTextUP.getText() );
+                if(TextUtils.isEmpty(editTextUN.getText()) || TextUtils.isEmpty(editTextUP.getText())){
+                    textView.setText("Username and password are required.");
+                } else {
+                    textView.setText("One moment...");
+
+                    //progressBar.animate();
+                    //Call login query
+                    String result = "";
+                    HashMap<String, String> hashMap = new HashMap<>(); //gen map to populate values
+                    hashMap.put("action", "login");
+                    hashMap.put("username", editTextUN.getText().toString());
+                    hashMap.put("password", editTextUP.getText().toString());
+                    String msg = "";
+                    //new Query(getApplicationContext(), hashMap, msg).execute(); //pass map to login task
+                    QueryThread thread = new QueryThread(getApplicationContext(), hashMap); //pass map to login task
+                    thread.start();
+
+                    Log.e("Result Found", thread.getResult());
+                    while(thread.getResult().length() < 1) {
+                        textView.setText("Loading...");
+                    }
+
+                    if(thread.getResult().contains("incorrect")) {
+                        //addResultText(errorText, "No account found, please try again.", 0);
+                    } else {
+                        finishLogin(thread.getUserAccount()); //set username and auth token for use the rest of the time
+                        finish();
+                    }
+
+                }
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(Object[] values) {
+
+                super.onProgressUpdate(values);
+            }
+
+            @Override
+            protected void onPreExecute() {
+                textView = textViewIn;
+                super.onPreExecute();
+            }
+
+        };
+
+        asyncTask.execute(errorText);
+
+
+        //1 progressBar.setVisibility(View.INVISIBLE);
+    }
+
+
 
     public void addResultText(TextView textView, String string, int tag) {
         switch(tag) {
@@ -161,7 +246,11 @@ public class UserLogin extends AppCompatActivity {
         }
 
         textView.setText(string + "\n");
+    }
 
+    public void addResultText(TextView textView, String string) {
+        //Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
+        //textView.setText(string + "\n");
     }
 
     public void openRegistration(View view) {
