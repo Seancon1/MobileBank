@@ -1,5 +1,6 @@
 package com.prestigecode.mobilebank;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,21 +22,22 @@ import com.prestigecode.mobilebank.User.Util;
 
 public class AccountHub extends AppCompatActivity {
 
-    User superUser = null;
+    User superUser;
     WebView webView;
     String currentURL;
     HashMap<String, String> usableURL;
+    Intent adaptiveWebViewIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_hub);
 
+        adaptiveWebViewIntent = new Intent( AccountHub.this, AdaptiveWebView.class); //set this here so I can use it later
+        webView = findViewById(R.id.WebView_AccountHub); //set webview for use
 
         //Very important
         superUser = getIntent().getParcelableExtra("User"); //Set this superUser from previous activity via Intent
-
-        webView = findViewById(R.id.WebView_AccountHub);
 
         //Thanks https://stackoverflow.com/questions/7586564/how-to-send-post-data-with-code-in-an-android-webview
         String postData = "ID=" + superUser.getID() + "&token=" + superUser.getToken();
@@ -75,16 +77,38 @@ public class AccountHub extends AppCompatActivity {
                         switch(actionWord) {
                             case "1":
                                 Toast.makeText(getApplicationContext(),"Action 1 Detected" , Toast.LENGTH_SHORT).show();
+                                adaptiveWebViewIntent.putExtra("ACTION", "123abc");
+                                break;
+                            case "savings":
+                                Toast.makeText(getApplicationContext(),"Action 'savings' Detected" , Toast.LENGTH_SHORT).show();
+                                adaptiveWebViewIntent.putExtra("ACTION", "savings");
+                                break;
+                            case "checking":
+                                Toast.makeText(getApplicationContext(),"Action 'checking' Detected" , Toast.LENGTH_SHORT).show();
+                                adaptiveWebViewIntent.putExtra("ACTION", "checking");
+                                break;
+                            case "credit":
+                                Toast.makeText(getApplicationContext(),"Action 'credit' Detected" , Toast.LENGTH_SHORT).show();
+                                adaptiveWebViewIntent.putExtra("ACTION", "credit");
                                 break;
 
                             default:
                                 //do nothing?
-                                Toast.makeText(getApplicationContext(),"URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
+                                //adaptiveWebViewIntent.putExtra("ACTION", "none");
                                 break;
                         }
                     }
                 } catch (Exception e) {
                     Log.e("AccountHub", "could not perform action from parsed URL - " + e.toString());
+                }
+
+                Log.e("AccountHub", "has extra ('ACTION'): " + adaptiveWebViewIntent.hasExtra("ACTION"));
+                //Do this is the ACTION intent has been filled, otherwise don't do anything
+                if(adaptiveWebViewIntent.hasExtra("ACTION")) {
+                    startActivityAdaptiveWebView();
+                } else {
+                    //do nothing
                 }
 
             }
@@ -93,6 +117,29 @@ public class AccountHub extends AppCompatActivity {
 
     public void showCurrentURL() {
         Toast.makeText(getApplicationContext(),"URL: " + currentURL, Toast.LENGTH_SHORT).show();
+    }
+
+    /*
+    Starts the Activity: AdaptiveWebView
+    -contains Extra for AdaptiveWebview to dynamically change per request
+    -requestCode in case I need to handle something
+    -send superUser for id/token
+     */
+    public void startActivityAdaptiveWebView () {
+
+        //Start activity with Extras
+        adaptiveWebViewIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        adaptiveWebViewIntent.putExtra("User", superUser);
+        Log.e("AccountHub", "Opening adaptiveWebview with superUser " + superUser.toString());
+        startActivityForResult(adaptiveWebViewIntent, 0);
+
+        /*
+        Remove extra once it is passed to the activity
+        preventing subsequent actions to open with old ACTION value
+         */
+        if(adaptiveWebViewIntent.hasExtra("ACTION")) {
+            adaptiveWebViewIntent.removeExtra("ACTION");
+        }
     }
 
 

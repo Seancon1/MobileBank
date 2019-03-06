@@ -23,7 +23,7 @@ public class User implements Parcelable {
     private String authString;
 
 
-    User() {
+    public User() {
 
     }
 

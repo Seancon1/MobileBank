@@ -28,6 +28,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
+import com.prestigecode.mobilebank.User.*;
 
 public class UserLogin extends AppCompatActivity {
 
@@ -94,26 +95,18 @@ public class UserLogin extends AppCompatActivity {
         setResult(Activity.RESULT_OK, intent); //send
     }
 
-
+    public void openPatchNotes(View view) {
+        Intent intent = new Intent(UserLogin.this, AdaptiveWebView.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.putExtra("User", new User()); //pass blank user so that
+        intent.putExtra("ACTION", "patch_notes");
+        startActivity(intent);
+    }
 
     public void doLogin(View view) {
 
         Button button = findViewById(R.id.buttonLogIn);
        // progressBar.setVisibility(View.VISIBLE);
-
-        AsyncTask asyncTask = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] objects) {
-                return null;
-            }
-
-            @Override
-            protected void onProgressUpdate(Object[] values) {
-                super.onProgressUpdate(values);
-            }
-        };
-
-        asyncTask.execute();
 
         try {
             //try login stuff
@@ -171,63 +164,84 @@ public class UserLogin extends AppCompatActivity {
     public void doLoginAsync(View view) {
 
         Button button = findViewById(R.id.buttonLogIn);
+        String itemResult = "item";
+        int paramVal = 1;
+        int progressItem = 0;
         // progressBar.setVisibility(View.VISIBLE);
         Log.e("Login", "Using asynctask!");
-        AsyncTask asyncTask = new AsyncTask(null, null, null) {
-            TextView textView = null;
+        AsyncTask asyncTask = new AsyncTask<Integer, Integer, String>() {
 
+            String asyncResult = "yay";
 
             @Override
-            protected Object doInBackground(Object[] objects) {
-                Log.e("INSIGHT", "" + editTextUN.getText() + "" + editTextUP.getText() );
-                if(TextUtils.isEmpty(editTextUN.getText()) || TextUtils.isEmpty(editTextUP.getText())){
-                    textView.setText("Username and password are required.");
-                } else {
-                    textView.setText("One moment...");
+            protected void onProgressUpdate(Integer... values) {
+                //increment one for the first integer passed
+                values[0]++;
+            }
 
-                    //progressBar.animate();
-                    //Call login query
-                    String result = "";
+            @Override
+            protected String doInBackground(Integer... integers) {
+                //Log.e("INSIGHT", "" + editTextUN.getText() + "" + editTextUP.getText() );
+                for(int num : integers) {
+                    Log.e("ASYNC TASK", "Integer passed: " + num);
+                }
+
+                if(TextUtils.isEmpty(editTextUN.getText()) || TextUtils.isEmpty(editTextUP.getText())){
+                    //textView.setText("Username and password are required.");
+                } else {
+                    //textView.setText("One moment...");
+
                     HashMap<String, String> hashMap = new HashMap<>(); //gen map to populate values
+
                     hashMap.put("action", "login");
                     hashMap.put("username", editTextUN.getText().toString());
                     hashMap.put("password", editTextUP.getText().toString());
                     String msg = "";
                     //new Query(getApplicationContext(), hashMap, msg).execute(); //pass map to login task
                     QueryThread thread = new QueryThread(getApplicationContext(), hashMap); //pass map to login task
-                    thread.start();
-
+                    //Call login query
                     Log.e("Result Found", thread.getResult());
+
                     while(thread.getResult().length() < 1) {
-                        textView.setText("Loading...");
+                        //textView.setText("Loading...");
+                        //Toast.makeText(getApplicationContext(), "Loading...", Toast.LENGTH_SHORT).show();
+                        //do nothing
+                    }
+                        asyncResult = thread.getResult();
+
+                        //finishLogin(thread.getUserAccount()); //set username and auth token for use the rest of the time
+                        //finish();
                     }
 
-                    if(thread.getResult().contains("incorrect")) {
-                        //addResultText(errorText, "No account found, please try again.", 0);
-                    } else {
-                        finishLogin(thread.getUserAccount()); //set username and auth token for use the rest of the time
-                        finish();
-                    }
 
-                }
                 return null;
             }
 
             @Override
-            protected void onProgressUpdate(Object[] values) {
+            protected void onPostExecute(String s) {
+                if(asyncResult.contains("incorrect")) {
+                    //addResultText(errorText, "No account found, please try again.", 0);
+                    s="invalid";
+                }
+                s = asyncResult;
 
-                super.onProgressUpdate(values);
             }
 
             @Override
             protected void onPreExecute() {
-                textView = textViewIn;
+                //textView = textViewIn;
                 super.onPreExecute();
             }
 
+            @Override
+            protected void onCancelled(String s) {
+                super.onCancelled(s);
+            }
         };
 
-        asyncTask.execute(errorText);
+        asyncTask.execute(paramVal, progressItem, itemResult);
+
+
 
 
         //1 progressBar.setVisibility(View.INVISIBLE);
@@ -254,7 +268,6 @@ public class UserLogin extends AppCompatActivity {
     }
 
     public void openRegistration(View view) {
-       //Intent intent = new Intent(UserLogin.this, RegisterAccount.class);
         Intent intent = new Intent(UserLogin.this, Web_RegisterAccount.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);

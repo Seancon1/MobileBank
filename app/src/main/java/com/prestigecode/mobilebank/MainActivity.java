@@ -216,6 +216,8 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
     }
 
+
+
     //TestList
     public void openList(View view) {
         //Intent intent = new Intent(MainActivity.this, MyItemRecyclerViewAdapter.class);

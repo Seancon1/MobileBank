@@ -15,4 +15,6 @@
     <string name="dialog_prompt_areyousure">Are you sure?</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="title_activity_adaptive_view">AdaptiveView</string>
+    <string name="title_activity_adaptive_web_view">AdaptiveWebView</string>
 </resources>
