@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.*;
 import com.prestigecode.mobilebank.DB.Query;
@@ -60,11 +61,27 @@ public class UserLogin extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        Toast.makeText(getApplicationContext(), "Long press back button to close application.", Toast.LENGTH_LONG).show();
+        /*
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         AreYouSure areYouSure = new AreYouSure();
         areYouSure.show(ft,"1");
+        //areYouSure.ge
         setResult(RESULT_CANCELED);
         //super.onBackPressed();
+        */
+    }
+
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            finishExit(); //Send code to exit MainActivity
+            finish();
+            // return false; //I have tried here true also
+            return super.onKeyLongPress(keyCode, event);
+        }
+        return false;
     }
 
 
@@ -93,6 +110,13 @@ public class UserLogin extends AppCompatActivity {
         //Add ParcelableExtra so we can return superUser to Main Activity
         intent.putExtra("User", inUser); //set inUser class as intent information
         setResult(Activity.RESULT_OK, intent); //send
+    }
+
+    private void finishExit() {
+        //Build intent to pass user back
+        Intent intent = new Intent(UserLogin.this, MainActivity.class);
+        intent.putExtra("CLOSE", 1); //send in order to check if we want to close
+        setResult(Activity.RESULT_CANCELED, intent); //send
     }
 
     public void openPatchNotes(View view) {
@@ -143,7 +167,7 @@ public class UserLogin extends AppCompatActivity {
                                     addResultText(errorText, "No account found, please try again.", 0);
                                 } else {
                                     finishLogin(thread.getUserAccount()); //set username and auth token for use the rest of the time
-                                    finish();
+                                    finish(); //Close this Activity
                                 }
 
                             }

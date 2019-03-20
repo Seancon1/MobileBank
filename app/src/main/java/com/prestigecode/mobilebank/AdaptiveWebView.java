@@ -2,12 +2,15 @@ package com.prestigecode.mobilebank;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.WebView;
+import android.webkit.*;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.prestigecode.mobilebank.User.User;
+import com.prestigecode.mobilebank.User.Util;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ public class AdaptiveWebView extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adaptive_web_view);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         textViewTitle = findViewById(R.id.textViewAdaptiveTextTitle);
 
         superUser = getIntent().getParcelableExtra("User"); //Set this superUser from previous activity via Intent
@@ -35,32 +39,137 @@ public class AdaptiveWebView extends AppCompatActivity {
         Log.e("AdaptiveWebView", "intentURL: " + intentAction + " - setURL result: " + setURL(intentAction));
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl(setURL(intentAction)); //Build URL from intent ACTION data
+        webView.canGoForward();
+        webView.canGoBack();
+        /*
+        onPageFinished is also included here in order for me
+        to load the WebView with a new URL based
+        on activity inside the WebView itself.
+        Instead of loading another Android Activity.
+         */
+
+
+        webView.setWebViewClient(new WebViewClient() {
+
+            /**
+             * onReceivedError and onReceivedHttpError
+             * prevent the user from encountering any undesirable webpage request, closes AdaptiveWebView.
+             */
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                Log.e("AdaptiveWebView", "error received" + request.toString());
+                Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
+                finish();
+                //super.onReceivedError(view, request, error);
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+                Log.e("AdaptiveWebView", "http error received" + request.toString());
+                Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
+                finish();
+                //super.onReceivedHttpError(view, request, errorResponse);
+            }
+
+            public void onPageFinished(WebView view, String url) {
+                currentURL = webView.getUrl(); //update url for each load
+                usableURL = new Util().dissectWebViewURL(currentURL); //parse url into something usable
+                String actionWord = "";
+
+                try{
+                    //Actions to do when parameter is available inside usableURL
+                    if(!usableURL.isEmpty()) {
+                        //Will switch() to something better later
+                        if(usableURL.containsKey("do")) {
+                            actionWord = usableURL.get("do");
+                        }
+
+                    /*
+                    action to do based on actionWord,
+                    e.g ?do=Fetch1
+                    key: do
+                    value: Fetch1
+                    actionWord = Fetch1
+                     */
+
+                        switch(actionWord) {
+                            case "showall":
+                                Toast.makeText(getApplicationContext(),"Showing your accounts" , Toast.LENGTH_SHORT).show();
+
+                                break;
+                            case "savings":
+                                Toast.makeText(getApplicationContext(),"Action 'savings' Detected" , Toast.LENGTH_SHORT).show();
+
+                                break;
+
+                            default:
+                                //do nothing?
+                                //Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
+                                //adaptiveWebViewIntent.putExtra("ACTION", "none");
+                                break;
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e("AdaptiveWebView", "could not perform action from parsed URL - " + e.toString());
+                }
+
+            }
+        });
+
     }
 
-    public String setURL(String pageDestinations) {
+
+    @Override
+    public void onBackPressed() {
+        if(webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public String setURL(String pageDestination) {
         StringBuilder stringBuilder = new StringBuilder();
-        String baseURL = "https://www.prestigecode.com/projects/senior/WebView/AdaptiveView.php";
+        String baseURL = "https://www.prestigecode.com/projects/senior/WebView/AdaptiveView.php?";
 
         stringBuilder.append(baseURL); //add baseURL first
 
-        Log.e("AdaptiveView", "pageDestinations: " + pageDestinations);
+        Log.e("AdaptiveView", "pageDestinations: " + pageDestination);
         //Build the rest of our URL
-        switch(pageDestinations) {
+        switch(pageDestination) {
+            case "showall":
+                changeTitle("Accounts");
+                stringBuilder.append("&page=showall");
+                break;
+            case "openNewAccount":
+                changeTitle("Open New Bank Account");
+                stringBuilder.append("&page=openNewAccount");
+                break;
             case "savings":
                 changeTitle("Savings Account");
-                stringBuilder.append("?page=savings");
+                stringBuilder.append("&page=showsavings");
                 break;
             case "checking":
-                textViewTitle.setText("Checking Account");
-                stringBuilder.append("?page=checking");
+                changeTitle("Checking Account");
+                stringBuilder.append("&page=showchecking");
                 break;
             case "credit":
-                textViewTitle.setText("Credit Account");
-                stringBuilder.append("?page=credit");
+                changeTitle("Credit Account");
+                stringBuilder.append("&page=showcredit");
+                break;
+            case "accHistory":
+                changeTitle("Credit Account");
+                stringBuilder.append("&page=accHistory");
+                break;
+            case "safety":
                 break;
 
              default:
-                 stringBuilder.append("?page=null");
+                 /*
+                 Allows for non-hardcoded actions to still redirect to a page. Is this safe?
+                  */
+                 changeTitle("Ambiguous Action");
+                 stringBuilder.append("&page=" + pageDestination);
                  break;
         }
 
@@ -71,13 +180,13 @@ public class AdaptiveWebView extends AppCompatActivity {
 
 
         //Patch note override
-        if(pageDestinations.matches("patch_notes")) {
+        if(pageDestination.matches("patch_notes")) {
             //stringBuilder.delete(0, stringBuilder.length()); //clear stringbuilder and replace
             changeTitle("Patch Notes");
             return "https://www.prestigecode.com/projects/senior/WebView/patch_notes.php";
         } else {
-            stringBuilder.append("&?id=" + superUser.getID());
-            stringBuilder.append("&?token=" + superUser.getToken());
+            stringBuilder.append("&id=" + superUser.getID());
+            stringBuilder.append("&token=" + superUser.getToken());
         }
         return ""+stringBuilder.toString();
     }

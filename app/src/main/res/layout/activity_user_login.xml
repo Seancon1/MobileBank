@@ -9,8 +9,8 @@
 
     <Button
             android:text="Open an Account"
-            android:layout_width="400dp"
-            android:layout_height="100dp"
+            android:layout_width="264dp"
+            android:layout_height="44dp"
             android:id="@+id/buttonRegister"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="54dp"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="54dp"
@@ -19,17 +19,17 @@
             android:hapticFeedbackEnabled="true"/>
     <Button
             android:text="Login"
-            android:layout_width="400dp"
-            android:layout_height="100dp"
+            android:layout_width="264dp"
+            android:layout_height="93dp"
             android:id="@+id/buttonLogIn"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="54dp"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="54dp"
             android:onClick="doLogin"
-            android:layout_marginBottom="28dp" app:layout_constraintBottom_toTopOf="@+id/buttonRegister"
-            android:hapticFeedbackEnabled="true"/>
+            android:layout_marginBottom="12dp" app:layout_constraintBottom_toTopOf="@+id/buttonRegister"
+            android:hapticFeedbackEnabled="true" app:layout_constraintHorizontal_bias="0.512"/>
     <EditText
-            android:layout_width="400dp"
-            android:layout_height="75dp"
+            android:layout_width="350dp"
+            android:layout_height="55dp"
             android:inputType="textPersonName"
             android:text="Name"
             android:ems="10"
@@ -41,8 +41,8 @@
             android:layout_marginBottom="30dp" app:layout_constraintBottom_toTopOf="@+id/editTextPass"
             android:textSize="24sp"/>
     <EditText
-            android:layout_width="400dp"
-            android:layout_height="75dp"
+            android:layout_width="350dp"
+            android:layout_height="55dp"
             android:inputType="textPassword"
             android:ems="10"
             android:id="@+id/editTextPass" android:layout_marginBottom="35dp"

@@ -12,8 +12,10 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -46,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     User superUser = null;
     boolean hasLoggedIn = false;
     int tick = 0;
+    boolean CANCELED = false;
 
     //Assign result with global scope, for now
     //HashMap<String,String> jsonResult;
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
     //UI items
     TextView txtAccountWelcome;
+    WebView webViewAccountPeak;
 
 
 
@@ -63,6 +67,11 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        /**
+         * Populate UI item references
+         */
+        txtAccountWelcome = findViewById(R.id.textViewAccountWelcome);
+        webViewAccountPeak = findViewById(R.id.WebView_AccountPeak);
 
         /*
         //Layout for bank information
@@ -81,8 +90,8 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         fragmentTransaction.commit();
 
         //we want to create a loadscreen really quick so hide all what we are loading
-        Intent splash = new Intent(MainActivity.this, SplashLoad.class);
-        startActivityForResult(splash, 0001);
+        //Intent splash = new Intent(MainActivity.this, SplashLoad.class);
+        //startActivityForResult(splash, 0001);
         //wait for the intent to come back with data
         //then continue on until
 
@@ -106,8 +115,11 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                 try {
                     Log.e("Log", "Thread start: running on MainActivity ");
 
-                    while(true) {
+                    //CANCELED should always remain false UNLESS user wants to close application
+                    //Otherwise loop indefinitely
+                    while(true && !CANCELED) {
 
+                        //Experimental
                         if(superUser == null) {
                             // .1 delay shortens the time that the main activity is shown upon startup
                             sleep(100); //
@@ -123,15 +135,20 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                         if (superUser == null && !hasLoggedIn) {
                             hasLoggedIn = true;
                             //superUser = new User(); //Populate just so tick doesn't continuously open new intents
-                            Intent intent = new Intent(MainActivity.this, UserLogin.class);
-                            //intent.putExtra("User", superUser);
 
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                            //intent.addFlags(Intent.makeMainActivity(UserLogin));
+                            //Double check CANCELED value. Should CANCEL be changed while Thread is sleeping
+                            if(!CANCELED) {
+                                Intent intent = new Intent(MainActivity.this, UserLogin.class);
+                                //intent.putExtra("User", superUser);
 
-                            //This request code is what is needed when the result is returned
-                            startActivityForResult(intent, 0);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                //intent.addFlags(Intent.makeMainActivity(UserLogin));
+
+                                //This request code is what is needed when the result is returned
+                                startActivityForResult(intent, 0);
+                            }
                         }
                     }
 
@@ -142,6 +159,26 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
     }
 
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(getApplicationContext(), "Long press back button to logout.", Toast.LENGTH_LONG).show();
+        //super.onBackPressed();
+    }
+
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            Toast.makeText(getApplicationContext(), "You logged out.", Toast.LENGTH_SHORT).show();
+            logUserOut();
+            //emptySuperUser();
+            //finish();
+            //super.finish();
+           // return false; //I have tried here true also
+            return super.onKeyLongPress(keyCode, event);
+        }
+        return false;
+    }
 
     //OnActivityResult is the default class that will handle the return codes for each intent that returns information here
     @Override
@@ -151,8 +188,9 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         switch(requestCode) {
             //Case go to the correct logic for that resultCode
 
-            case 0: //login
+            case 0: //UserLogin.java
                 if(resultCode == Activity.RESULT_OK) {
+
                     hasLoggedIn = true;
                     superUser = data.getParcelableExtra("User"); //returns User defined in login, and put it for access here
                     //Update display items
@@ -166,15 +204,27 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                     fetchAccountInfo();
 
 
+
                 }
                 if(resultCode == Activity.RESULT_CANCELED) {
                     superUser = null; //to reset superUser to null
                     hasLoggedIn = false;
+                    Log.e("MainActivity", "UserLogin result: RESULT CANCELED.");
+                    try {
+                        if (data.hasExtra("CLOSE")) {
+                            Log.e("MainActivity", "has extra: CLOSE, FINISHING ACTIVITY");
+                            //finish();
+                            CANCELED = true; // should stop thread loop for opening UserLogin
+                            super.finish();
+                        }
+                    } catch (Exception e) {
+                        Log.e("MainActivity", "RESULT CANCELED error." + e.toString());
+                    }
                     //finish(); //experimental
                 }
                 break;
 
-            case 1: //logout
+            case 1: //MyAccount.java
                 if(resultCode == Activity.RESULT_OK) {
                     logUserOut();
                 }
@@ -183,6 +233,15 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         //Maybe here I can issue an update on items?
 
 
+    }
+
+    /**
+     * onResume: Load each time the activity is resumed
+     */
+    @Override
+    protected void onResume() {
+        loadBankAccountPeak();
+        super.onResume();
     }
 
     public void amILogged(View view) {
@@ -224,7 +283,8 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         //loginActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         //startActivity(intent);
         //Fragment fragment = new Fragment();
-        Button button = findViewById(R.id.button2);
+        Button button = null;
+       //Button button = findViewById(R.id.button2);
         String buttonResponse;
         try {
             /*
@@ -245,7 +305,9 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
     }
 
-
+    /**
+     * Fetch account information from the QueryThread using HashMap of defined values.
+     */
     public void fetchAccountInfo() {
         /*
         For now I am running threads for each new operation since I need a result
@@ -278,12 +340,15 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         singleThread.start();
     }
 
-
+    /**
+        Display Account Information
+     */
     public void displayAccountInfo(View view) {
 
         fetchAccountInfo();
 
-        TextView textView = findViewById(R.id.textViewSimpleBankAccountView);
+       TextView textView = null;
+       //TextView textView = findViewById(R.id.textViewSimpleBankAccountView);
 
         try {
             System.out.println("TRYING TO GET EACH ITEM TO APPEND");
@@ -340,5 +405,32 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         hasLoggedIn = false; //to switch that a user is not logged in, triggering other login checks
         jsonBankAccountResult = null;
         return true;
+    }
+
+    public void emptySuperUser() {
+        superUser = new User();
+        jsonBankAccountResult = null;
+    }
+
+    /**
+     *
+     * Loading Bank Account Information peak
+     */
+    public void loadBankAccountPeak() {
+
+        try{
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("https://www.prestigecode.com/projects/senior/WebView/AdaptiveView.php?");
+            stringBuilder.append("id=" + superUser.getID());
+            stringBuilder.append("&token=" + superUser.getToken());
+            stringBuilder.append("&page=" + "briefShowAll"); //also includes removing session values.
+            webViewAccountPeak.clearCache(true); //removes items that should be removed
+            //webViewAccountPeak.
+            webViewAccountPeak.loadUrl(stringBuilder.toString());
+        } catch (Exception e) {
+            Log.e("MainActivity", "Could not load BankAccountPeak" + e.toString());
+        }
+
+
     }
 }

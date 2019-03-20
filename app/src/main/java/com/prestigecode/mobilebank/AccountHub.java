@@ -1,6 +1,7 @@
 package com.prestigecode.mobilebank;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,6 +33,7 @@ public class AccountHub extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_hub);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         adaptiveWebViewIntent = new Intent( AccountHub.this, AdaptiveWebView.class); //set this here so I can use it later
         webView = findViewById(R.id.WebView_AccountHub); //set webview for use
@@ -42,6 +44,7 @@ public class AccountHub extends AppCompatActivity {
         //Thanks https://stackoverflow.com/questions/7586564/how-to-send-post-data-with-code-in-an-android-webview
         String postData = "ID=" + superUser.getID() + "&token=" + superUser.getToken();
 
+        //Using postData, we push as GET info
         webView.postUrl("https://www.prestigecode.com/projects/senior/WebView/Lobby_AccountBalancePreview.php", EncodingUtils.getBytes(postData, "BASE64"));
 
 
@@ -75,27 +78,34 @@ public class AccountHub extends AppCompatActivity {
                      */
 
                         switch(actionWord) {
-                            case "1":
-                                Toast.makeText(getApplicationContext(),"Action 1 Detected" , Toast.LENGTH_SHORT).show();
-                                adaptiveWebViewIntent.putExtra("ACTION", "123abc");
+                            case "showall":
+                                Toast.makeText(getApplicationContext(),"Showing your accounts" , Toast.LENGTH_SHORT).show();
+                                adaptiveWebViewIntent.putExtra("ACTION", "showall");
                                 break;
                             case "savings":
                                 Toast.makeText(getApplicationContext(),"Action 'savings' Detected" , Toast.LENGTH_SHORT).show();
-                                adaptiveWebViewIntent.putExtra("ACTION", "savings");
+                                adaptiveWebViewIntent.putExtra("ACTION", "showsavings");
                                 break;
                             case "checking":
                                 Toast.makeText(getApplicationContext(),"Action 'checking' Detected" , Toast.LENGTH_SHORT).show();
-                                adaptiveWebViewIntent.putExtra("ACTION", "checking");
+                                adaptiveWebViewIntent.putExtra("ACTION", "showchecking");
                                 break;
                             case "credit":
                                 Toast.makeText(getApplicationContext(),"Action 'credit' Detected" , Toast.LENGTH_SHORT).show();
-                                adaptiveWebViewIntent.putExtra("ACTION", "credit");
+                                adaptiveWebViewIntent.putExtra("ACTION", "showcredit");
+                                break;
+                            case "openNewAccount":
+                                Toast.makeText(getApplicationContext(),"Open new account" , Toast.LENGTH_SHORT).show();
+                                adaptiveWebViewIntent.putExtra("ACTION", "openNewAccount");
                                 break;
 
                             default:
-                                //do nothing?
+                                /*
+                                 * Set action word anyways, this ensures I can do other webpage updates WITHOUT hardcoding url modifications
+                                 * EXPERIMENTAL, no secure flaws have been considered, is this safe?
+                                 */
                                 Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
-                                //adaptiveWebViewIntent.putExtra("ACTION", "none");
+                                adaptiveWebViewIntent.putExtra("ACTION", actionWord);
                                 break;
                         }
                     }
@@ -135,7 +145,7 @@ public class AccountHub extends AppCompatActivity {
 
         /*
         Remove extra once it is passed to the activity
-        preventing subsequent actions to open with old ACTION value
+        preventing subsequent actions to open with old ACTION values
          */
         if(adaptiveWebViewIntent.hasExtra("ACTION")) {
             adaptiveWebViewIntent.removeExtra("ACTION");
