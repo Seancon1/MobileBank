@@ -415,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     /**
      *
      * Loading Bank Account Information peak
+     *
      */
     public void loadBankAccountPeak() {
 

@@ -10,6 +10,7 @@ import android.webkit.*;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.prestigecode.mobilebank.User.User;
+import com.prestigecode.mobilebank.User.User_MoneyRequest;
 import com.prestigecode.mobilebank.User.Util;
 
 import java.net.URL;
@@ -72,7 +73,9 @@ public class AdaptiveWebView extends AppCompatActivity {
             }
 
             public void onPageFinished(WebView view, String url) {
+
                 currentURL = webView.getUrl(); //update url for each load
+                Log.e("AdaptiveWebView", "URL : " + currentURL);
                 usableURL = new Util().dissectWebViewURL(currentURL); //parse url into something usable
                 String actionWord = "";
 
@@ -99,9 +102,17 @@ public class AdaptiveWebView extends AppCompatActivity {
                                 break;
                             case "savings":
                                 Toast.makeText(getApplicationContext(),"Action 'savings' Detected" , Toast.LENGTH_SHORT).show();
-
                                 break;
-
+                            case "OpenTransfer":
+                                webView.clearHistory(); //so user does not go back
+                                changeTitle("Money Transfer");
+                                Log.e("AdaptiveWebView", "OpenTransfer detected | " +getAdditionalURLParam("outID") + " " + getAdditionalURLParam("recipientName"));
+                                Intent intent = new Intent(AdaptiveWebView.this, User_MoneyRequest.class);
+                                intent.putExtra("User", superUser); //set inUser class as intent information
+                                intent.putExtra("TransferID", getAdditionalURLParam("outID")); //should get &outID=[THIS VALUE]
+                                intent.putExtra("recipient", getAdditionalURLParam("recipientName")); //should get &outID=[THIS VALUE]
+                                startActivity(intent); //send
+                                break;
                             default:
                                 //do nothing?
                                 //Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
@@ -161,6 +172,7 @@ public class AdaptiveWebView extends AppCompatActivity {
                 changeTitle("Credit Account");
                 stringBuilder.append("&page=accHistory");
                 break;
+
             case "safety":
                 break;
 
@@ -176,6 +188,7 @@ public class AdaptiveWebView extends AppCompatActivity {
 
         //for now, GET value will be defined, will probably move to a HTTPS POST
         //so I can identify the user on the website more securely
+
 
 
 
@@ -203,4 +216,24 @@ public class AdaptiveWebView extends AppCompatActivity {
         intent.putExtra("User", superUser); //set inUser class as intent information
         setResult(Activity.RESULT_OK, intent); //send
     }
+
+    /**
+     Provides a way to get another variable inside the current URL
+     */
+    public String getAdditionalURLParam(String param) {
+        Log.e("AdaptiveWebView", ": getAdditionalURLparam - param:" + param);
+        usableURL = new Util().dissectWebViewURL(currentURL); //parse url into something usable
+        return  usableURL.get(param);
+    }
 }
+
+/*
+        if(pageDestination.matches("OpenTransfer")) {
+            Log.e("AdaptiveWebView", "OpenTransfer detected");
+            Log.e("AdaptiveWebView", "Additional url param: outID: " + getAdditionalURLParam("outID"));
+            Intent intent = new Intent(AdaptiveWebView.this, User_MoneyRequest.class);
+            intent.putExtra("User", superUser); //set inUser class as intent information
+            intent.putExtra("TransferID", getAdditionalURLParam("outID")); //should get &outID=[THIS VALUE]
+            setResult(Activity.RESULT_OK, intent); //send
+        }
+ */

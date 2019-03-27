@@ -13,6 +13,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
+        <activity android:name=".User.User_MoneyRequest">
+        </activity>
         <activity android:name=".AdaptiveWebView">
         </activity>
         <activity android:name=".AccountOpen">
