@@ -29,7 +29,7 @@ public class User_MoneyRequest extends AppCompatActivity {
     String getOutID = "0";
     String getRecipientName = null;
     TextView txtRecipientName = null;
-    String queryResult = null;
+    String queryResult = "";
     Button requestButton = null;
     Button sendButton = null;
     EditText editTextAmount = null;
@@ -78,7 +78,10 @@ public class User_MoneyRequest extends AppCompatActivity {
             }
         });
 
+        /*
         Thread thread = new Thread() {
+
+
             @Override
             public void run() {
                 try {
@@ -86,16 +89,15 @@ public class User_MoneyRequest extends AppCompatActivity {
 
                     //CANCELED should always remain false UNLESS user wants to close application
                     //Otherwise loop indefinitely
-                    while(!queryThreadComplete) {
-                            //when user is populated, then a normal 1 second tick is established
-                            sleep(1000);
-                    }
 
-                } catch (Exception e) {}
+
+                } catch (Exception e) {
+                    Log.e("User_MoneyRequest", "Thread " + e.toString());
+                }
             }
         };
         thread.start();
-
+*/
 
     }
 
@@ -109,6 +111,8 @@ public class User_MoneyRequest extends AppCompatActivity {
         I need to use AsyncTask for this but still learning how to get results easier without null point exception somewhere
          */
 
+        queryThreadComplete = false;
+            changeButtonEnabledStatus(false);
             Thread singleThread = new Thread() {
                 @Override
                 public void run() {
@@ -137,7 +141,7 @@ public class User_MoneyRequest extends AppCompatActivity {
                         }
 
                         queryResult = thread.getResult();
-                        finish();
+                        //finish();
                     } catch (Exception e) {
                         Log.e("User_MoneyRequest", e.toString());
                     }
@@ -147,8 +151,30 @@ public class User_MoneyRequest extends AppCompatActivity {
             };
             singleThread.start();
 
-        Toast.makeText(getApplicationContext(), "Transfer Request Sent"+queryResult, Toast.LENGTH_LONG).show();
+            /**
+                !!!
+             Aware of running this on main will cause unresponsiveness
+                !!!
+             */
+                while(queryThreadComplete == false) {
+                    //when user is populated, then a normal 1 second tick is established
+                    Log.e("User_MoneyRequest", "tick: " + queryResult);
+                    if(queryResult.length() > 0) {
 
+                        if(queryResult.contains("success")) {
+                            queryThreadComplete = true;
+                            Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                            finish();
+                        } else {
+                            queryThreadComplete = true;
+                            Toast.makeText(getApplicationContext(), "Failed, try again", Toast.LENGTH_SHORT).show();
+                            changeButtonEnabledStatus(true);
+                        }
+
+                    }
+                }
+
+        //Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
     }
 
     public void setResultDisplay(String text) {
@@ -172,4 +198,10 @@ public class User_MoneyRequest extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "You must put a valid value.", Toast.LENGTH_LONG).show();
         return false;
     }
+
+    public void changeButtonEnabledStatus(boolean status) {
+        sendButton.setEnabled(status);
+        requestButton.setEnabled(status);
+    }
+
 }
