@@ -42,13 +42,6 @@ public class AdaptiveWebView extends AppCompatActivity {
         webView.loadUrl(setURL(intentAction)); //Build URL from intent ACTION data
         webView.canGoForward();
         webView.canGoBack();
-        /*
-        onPageFinished is also included here in order for me
-        to load the WebView with a new URL based
-        on activity inside the WebView itself.
-        Instead of loading another Android Activity.
-         */
-
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -60,7 +53,7 @@ public class AdaptiveWebView extends AppCompatActivity {
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 Log.e("AdaptiveWebView", "error received" + request.toString());
                 Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
-                finish();
+                //finish();
                 //super.onReceivedError(view, request, error);
             }
 
@@ -68,10 +61,16 @@ public class AdaptiveWebView extends AppCompatActivity {
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
                 Log.e("AdaptiveWebView", "http error received" + request.toString());
                 Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
-                finish();
+                //finish();
                 //super.onReceivedHttpError(view, request, errorResponse);
             }
 
+            /**
+             * onPageFinished is called and used to check the current URL of the WebView.
+             * This is to enable the use of ?do= to redirect THIS CLIENT to another URL/Page
+             * @param view : this WebView
+             * @param url : URL of the WebView
+             */
             public void onPageFinished(WebView view, String url) {
 
                 currentURL = webView.getUrl(); //update url for each load
@@ -82,7 +81,6 @@ public class AdaptiveWebView extends AppCompatActivity {
                 try{
                     //Actions to do when parameter is available inside usableURL
                     if(!usableURL.isEmpty()) {
-                        //Will switch() to something better later
                         if(usableURL.containsKey("do")) {
                             actionWord = usableURL.get("do");
                         }
@@ -95,14 +93,10 @@ public class AdaptiveWebView extends AppCompatActivity {
                     actionWord = Fetch1
                      */
 
+                        /*
+                         * This is a double check for when a
+                         */
                         switch(actionWord) {
-                            case "showall":
-                                Toast.makeText(getApplicationContext(),"Showing your accounts" , Toast.LENGTH_SHORT).show();
-
-                                break;
-                            case "savings":
-                                Toast.makeText(getApplicationContext(),"Action 'savings' Detected" , Toast.LENGTH_SHORT).show();
-                                break;
                             case "OpenTransfer":
                                 webView.clearHistory(); //so user does not go back
                                 changeTitle("Money Transfer");
@@ -117,6 +111,7 @@ public class AdaptiveWebView extends AppCompatActivity {
                                 //do nothing?
                                 //Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
                                 //adaptiveWebViewIntent.putExtra("ACTION", "none");
+
                                 break;
                         }
                     }
@@ -128,7 +123,6 @@ public class AdaptiveWebView extends AppCompatActivity {
         });
 
     }
-
 
     @Override
     public void onBackPressed() {
@@ -169,18 +163,22 @@ public class AdaptiveWebView extends AppCompatActivity {
                 stringBuilder.append("&page=showcredit");
                 break;
             case "accHistory":
-                changeTitle("Credit Account");
+                changeTitle("History");
                 stringBuilder.append("&page=accHistory");
+                break;
+            case "myaccount":
+                changeTitle("Your Account");
+                stringBuilder.append("&page=myaccount");
                 break;
 
             case "safety":
                 break;
 
-             default:
-                 /*
+                /*
                  Allows for non-hardcoded actions to still redirect to a page. Is this safe?
                   */
-                 changeTitle("Ambiguous Action");
+             default:
+                 changeTitle("");
                  stringBuilder.append("&page=" + pageDestination);
                  break;
         }
@@ -188,8 +186,6 @@ public class AdaptiveWebView extends AppCompatActivity {
 
         //for now, GET value will be defined, will probably move to a HTTPS POST
         //so I can identify the user on the website more securely
-
-
 
 
         //Patch note override
@@ -225,6 +221,9 @@ public class AdaptiveWebView extends AppCompatActivity {
         usableURL = new Util().dissectWebViewURL(currentURL); //parse url into something usable
         return  usableURL.get(param);
     }
+
+
+
 }
 
 /*

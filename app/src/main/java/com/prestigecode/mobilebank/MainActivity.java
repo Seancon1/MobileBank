@@ -247,8 +247,10 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     public void amILogged(View view) {
         doCheckIfLogged();
 
-        Intent intent = new Intent(MainActivity.this, MyAccount.class);
+        //Intent intent = new Intent(MainActivity.this, MyAccount.class);
+        Intent intent = new Intent(MainActivity.this, AdaptiveWebView.class);
         intent.putExtra("User", superUser);
+        intent.putExtra("ACTION", "myaccount");
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivityForResult(intent, 1);
     }
@@ -431,7 +433,5 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         } catch (Exception e) {
             Log.e("MainActivity", "Could not load BankAccountPeak" + e.toString());
         }
-
-
     }
 }

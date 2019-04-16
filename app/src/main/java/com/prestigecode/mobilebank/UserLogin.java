@@ -163,12 +163,17 @@ public class UserLogin extends AppCompatActivity {
 
                                     sleep(250);
                                 }
+                                addResultText(errorText, "Done", 1);
+
                                 if(thread.getResult().contains("incorrect")) {
                                     addResultText(errorText, "No account found, please try again.", 0);
                                 } else {
+                                    addResultText(errorText, "Logging you in...", 1);
                                     finishLogin(thread.getUserAccount()); //set username and auth token for use the rest of the time
                                     finish(); //Close this Activity
                                 }
+
+
 
                             }
 

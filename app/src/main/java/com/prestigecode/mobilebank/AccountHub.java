@@ -123,6 +123,8 @@ public class AccountHub extends AppCompatActivity {
 
             }
         });
+
+
     }
 
     public void showCurrentURL() {
@@ -151,6 +153,7 @@ public class AccountHub extends AppCompatActivity {
             adaptiveWebViewIntent.removeExtra("ACTION");
         }
     }
+
 
 
 }

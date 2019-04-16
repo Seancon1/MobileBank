@@ -91,5 +91,5 @@
             android:id="@+id/buttonPatchNotes" android:onClick="openPatchNotes"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="251dp"
-            app:layout_constraintHorizontal_bias="0.068"/>
+            app:layout_constraintHorizontal_bias="0.068" android:visibility="invisible"/>
 </android.support.constraint.ConstraintLayout>
