@@ -79,23 +79,23 @@ public class AccountHub extends AppCompatActivity {
 
                         switch(actionWord) {
                             case "showall":
-                                Toast.makeText(getApplicationContext(),"Showing your accounts" , Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(),"Showing your accounts" , Toast.LENGTH_SHORT).show();
                                 adaptiveWebViewIntent.putExtra("ACTION", "showall");
                                 break;
                             case "savings":
-                                Toast.makeText(getApplicationContext(),"Action 'savings' Detected" , Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(),"Action 'savings' Detected" , Toast.LENGTH_SHORT).show();
                                 adaptiveWebViewIntent.putExtra("ACTION", "showsavings");
                                 break;
                             case "checking":
-                                Toast.makeText(getApplicationContext(),"Action 'checking' Detected" , Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(),"Action 'checking' Detected" , Toast.LENGTH_SHORT).show();
                                 adaptiveWebViewIntent.putExtra("ACTION", "showchecking");
                                 break;
                             case "credit":
-                                Toast.makeText(getApplicationContext(),"Action 'credit' Detected" , Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(),"Action 'credit' Detected" , Toast.LENGTH_SHORT).show();
                                 adaptiveWebViewIntent.putExtra("ACTION", "showcredit");
                                 break;
                             case "openNewAccount":
-                                Toast.makeText(getApplicationContext(),"Open new account" , Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(),"Open new account" , Toast.LENGTH_SHORT).show();
                                 adaptiveWebViewIntent.putExtra("ACTION", "openNewAccount");
                                 break;
 
@@ -104,7 +104,7 @@ public class AccountHub extends AppCompatActivity {
                                  * Set action word anyways, this ensures I can do other webpage updates WITHOUT hardcoding url modifications
                                  * EXPERIMENTAL, no secure flaws have been considered, is this safe?
                                  */
-                                Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
                                 adaptiveWebViewIntent.putExtra("ACTION", actionWord);
                                 break;
                         }

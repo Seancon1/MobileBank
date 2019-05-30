@@ -52,16 +52,16 @@ public class AdaptiveWebView extends AppCompatActivity {
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 Log.e("AdaptiveWebView", "error received" + request.toString());
-                Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
-                //finish();
+                //Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
+                finish();
                 //super.onReceivedError(view, request, error);
             }
 
             @Override
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
                 Log.e("AdaptiveWebView", "http error received" + request.toString());
-                Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
-                //finish();
+                //Toast.makeText(getApplicationContext(),"Error detected, returning you to safety" , Toast.LENGTH_SHORT).show();
+                finish();
                 //super.onReceivedHttpError(view, request, errorResponse);
             }
 
@@ -81,8 +81,12 @@ public class AdaptiveWebView extends AppCompatActivity {
                 try{
                     //Actions to do when parameter is available inside usableURL
                     if(!usableURL.isEmpty()) {
-                        if(usableURL.containsKey("do")) {
+                        //if has do and is not empty, do redirect
+                        if(usableURL.containsKey("do") && usableURL.get("do").length() > 0) {
                             actionWord = usableURL.get("do");
+                            Log.e("AdaptiveWebView", "onPageFinished: URL: [" + usableURL + "]");
+                            Log.e("AdaptiveWebView", "onPageFinished: ?do= [" + actionWord + "]");
+
                         }
 
                     /*
@@ -109,9 +113,8 @@ public class AdaptiveWebView extends AppCompatActivity {
                                 break;
                             default:
                                 //do nothing?
-                                //Toast.makeText(getApplicationContext(),"AMBIGUOUS Action - URL: ?do= " + actionWord, Toast.LENGTH_SHORT).show();
-                                //adaptiveWebViewIntent.putExtra("ACTION", "none");
-
+                                //view.putExtra("ACTION", "none");
+                                //webView.loadUrl(setURL(actionWord)); //open page with the ?do= ACTIONWORD
                                 break;
                         }
                     }

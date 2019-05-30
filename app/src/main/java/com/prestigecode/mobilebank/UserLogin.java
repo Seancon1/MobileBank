@@ -165,7 +165,7 @@ public class UserLogin extends AppCompatActivity {
                                 }
                                 addResultText(errorText, "Done", 1);
 
-                                if(thread.getResult().contains("incorrect")) {
+                                if(thread.getResult().contains("incorrect") || thread.getResult().contains("invalid_login_credentials")) {
                                     addResultText(errorText, "No account found, please try again.", 0);
                                 } else {
                                     addResultText(errorText, "Logging you in...", 1);

@@ -126,9 +126,9 @@ public class User_MoneyRequest extends AppCompatActivity {
                         hashMap.put("transferAmount", "" + inAmount);
                         //0 for request, 1 for send
                         if(type == 0) {
-                            hashMap.put("transferType", "0");
+                            hashMap.put("transferType", "0"); // REQUEST
                         } else {
-                            hashMap.put("transferType", "1");
+                            hashMap.put("transferType", "1"); // SEND
                         }
 
 

@@ -39,7 +39,7 @@ public class Util {
 
             return map;
         } catch (Exception e) {
-            Log.e("AccountHub", ""+e.toString());
+            Log.e("Util", ""+e.toString());
             return null;
         }
 
